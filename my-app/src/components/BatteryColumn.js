@@ -1,6 +1,6 @@
 import SortableItem from './SortableItem'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { DndContext, closestCenter } from '@dnd-kit/core'
+import { DndContext, MouseSensor, TouchSensor, closestCenter, useSensor } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useState } from 'react'
 
@@ -22,17 +22,22 @@ export default function BatteryColumn() {
         'Battery 14',
     ])
 
+    const mouseSensor = useSensor(MouseSensor);
+    const touchSensor = useSensor(TouchSensor);
+
     return (
         <DndContext
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            sensors={[mouseSensor, touchSensor]}
+            autoScroll={{threshold: {x: 0, y: 0.2}}}
         >
             <SortableContext
                 items={batteryList}
                 strategy={verticalListSortingStrategy}
             >
-                {batteryList.map((battery) => (
-                    <SortableItem key={battery} id={battery} />
+                {batteryList.map((battery, index) => (
+                    <SortableItem key={battery} id={battery} index={index}/>
                 ))}
             </SortableContext>
         </DndContext>

@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { styled } from '@mui/material'
 import Battery80Icon from '@mui/icons-material/Battery80'
 
-export default function SortableItem({ id }) {
+export default function SortableItem({ id, index }) {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id: id })
 
@@ -26,7 +26,7 @@ export default function SortableItem({ id }) {
 
     return (
         <div ref={setNodeRef} {...attributes} {...listeners}>
-            <Item>
+            <Item elevation={index}>
                 <Battery80Icon />
                 {id}
             </Item>
