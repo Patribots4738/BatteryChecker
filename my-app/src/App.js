@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
-import { DndContext } from '@dnd-kit/core'
-import BatteryMenu from './components/BatteryMenu'
+import React from 'react'
+import './App.css'
+import BatteryContainer from './components/BatteryContainer'
 
 export default function App() {
     return (
         <div className="App">
-            <BatteryMenu items={['Battery 1', 'Battery 2', 'Battery 3']} />
+            <BatteryContainer />
         </div>
     )
 }
