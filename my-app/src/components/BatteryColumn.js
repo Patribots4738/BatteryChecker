@@ -2,25 +2,34 @@ import SortableItem from './SortableItem'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { DndContext, MouseSensor, TouchSensor, closestCenter, useSensor } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+import { ref, onValue, set, update } from 'firebase/database'
+import { db } from '../firebase/firebaseConfig'
 
 export default function BatteryColumn() {
-    const [batteryList, setBatteryList] = useState([
-        'Battery 1',
-        'Battery 2',
-        'Battery 3',
-        'Battery 4',
-        'Battery 5',
-        'Battery 6',
-        'Battery 7',
-        'Battery 8',
-        'Battery 9',
-        'Battery 10',
-        'Battery 11',
-        'Battery 12',
-        'Battery 13',
-        'Battery 14',
-    ])
+    const [batteryList, setBatteryList] = useState([])
+
+    useEffect(() => {
+        setTimeout(() => {
+
+        const query = ref(db, 'batteries')
+        return onValue(query, (snapshot) => {
+            const data = snapshot.val()
+            
+            if (snapshot.exists()) {
+                let batteryList = []
+                Object.keys(data).forEach((key) => {
+                    if (key == "donot") return
+                    console.log(key)
+                    batteryList.push(key)
+                })
+                setBatteryList(batteryList)
+            }
+        })
+        }
+        , 1000)
+    }, []);
 
     const mouseSensor = useSensor(MouseSensor);
     const touchSensor = useSensor(TouchSensor);
@@ -46,11 +55,21 @@ export default function BatteryColumn() {
     function handleDragEnd(event) {
         const { active, over } = event
         if (over && active.id !== over.id) {
-            setBatteryList((items) => {
-                const oldIndex = items.indexOf(active.id)
-                const newIndex = items.indexOf(over.id)
-                return arrayMove(items, oldIndex, newIndex)
+            
+            const newList = () => {
+                const oldIndex = batteryList.indexOf(active.id)
+                const newIndex = batteryList.indexOf(over.id)
+                return arrayMove(batteryList, oldIndex, newIndex)
+            }
+
+            const updates = {}
+            newList().forEach((battery, index) => {
+                updates[battery] = index
             })
+            updates['donot'] = 'delete'
+            update(ref(db, 'batteries'), updates)
+
+            setBatteryList(newList)
         }
     }
 }
