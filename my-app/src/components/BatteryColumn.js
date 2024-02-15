@@ -1,6 +1,12 @@
 import SortableItem from './SortableItem'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { DndContext, MouseSensor, TouchSensor, closestCenter, useSensor } from '@dnd-kit/core'
+import {
+    DndContext,
+    MouseSensor,
+    TouchSensor,
+    closestCenter,
+    useSensor,
+} from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useEffect, useState } from 'react'
 
@@ -12,41 +18,39 @@ export default function BatteryColumn() {
 
     useEffect(() => {
         setTimeout(() => {
+            const query = ref(db, 'batteries')
+            return onValue(query, (snapshot) => {
+                const data = snapshot.val()
 
-        const query = ref(db, 'batteries')
-        return onValue(query, (snapshot) => {
-            const data = snapshot.val()
-            
-            if (snapshot.exists()) {
-                let batteryList = []
-                Object.keys(data).forEach((key) => {
-                    if (key == "donot") return
-                    console.log(key)
-                    batteryList.push(key)
-                })
-                setBatteryList(batteryList)
-            }
-        })
-        }
-        , 1000)
-    }, []);
+                if (snapshot.exists()) {
+                    let batteryList = []
+                    Object.keys(data).forEach((key) => {
+                        if (key == 'donot') return
+                        console.log(key)
+                        batteryList.push(key)
+                    })
+                    setBatteryList(batteryList)
+                }
+            })
+        }, 1000)
+    }, [])
 
-    const mouseSensor = useSensor(MouseSensor);
-    const touchSensor = useSensor(TouchSensor);
+    const mouseSensor = useSensor(MouseSensor)
+    const touchSensor = useSensor(TouchSensor)
 
     return (
         <DndContext
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
             sensors={[mouseSensor, touchSensor]}
-            autoScroll={{threshold: {x: 0, y: 0.2}}}
+            autoScroll={{ threshold: { x: 0, y: 0.2 } }}
         >
             <SortableContext
                 items={batteryList}
                 strategy={verticalListSortingStrategy}
             >
                 {batteryList.map((battery, index) => (
-                    <SortableItem key={battery} id={battery} index={index}/>
+                    <SortableItem key={battery} id={battery} index={index} />
                 ))}
             </SortableContext>
         </DndContext>
@@ -55,7 +59,6 @@ export default function BatteryColumn() {
     function handleDragEnd(event) {
         const { active, over } = event
         if (over && active.id !== over.id) {
-            
             const newList = () => {
                 const oldIndex = batteryList.indexOf(active.id)
                 const newIndex = batteryList.indexOf(over.id)
