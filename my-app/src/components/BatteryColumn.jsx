@@ -17,23 +17,25 @@ import { Droppable } from './Droppable'
 export default function BatteryColumn() {
     const [batteryList, setBatteryList] = useState([])
     const [activeBattery, setActiveBattery] = useState('')
+    const [data, setData] = useState({})
 
     useEffect(() => {
         setTimeout(() => {
             const query = ref(db, 'batteries')
             return onValue(query, (snapshot) => {
                 const data = snapshot.val()
-
+    
                 if (snapshot.exists()) {
                     let batteryList = []
                     let activeBattery = ''
+                    setData(data)
                     console.log('data:', data)
                     Object.keys(data)
                         .filter((key) => key !== 'donot' && key !== 'Active Battery')
-                        .sort((a, b) => data[a] - data[b])
+                        .sort((a, b) => data[a].index - data[b].index)
                         .forEach((key) => {
                             console.log('key:', key)
-                            if (data[key] === -1) return
+                            if (data[key].index === -1) return
                             console.log(key)
                             batteryList.push(key)
                         })
@@ -77,14 +79,14 @@ export default function BatteryColumn() {
 
     function resetDatabase() {
         const updates = {
-            'Battery 1': -1,
-            'Battery 2': 0,
-            'Battery 3': 1,
-            'Battery 4': 2,
-            'Battery 5': 3,
-            'Battery 6': 4,
-            'Battery 7': 5,
-            'Battery 8': 6,
+            'Battery 1': { index: -1, count: 0 },
+            'Battery 2': { index: 0, count: 0 },
+            'Battery 3': { index: 1, count: 0 },
+            'Battery 4': { index: 2, count: 0 },
+            'Battery 5': { index: 3, count: 0 },
+            'Battery 6': { index: 4, count: 0 },
+            'Battery 7': { index: 5, count: 0 },
+            'Battery 8': { index: 6, count: 0 },
             donot: 'delete',
             'Active Battery': 'Battery 1',
         }
@@ -100,8 +102,15 @@ export default function BatteryColumn() {
             setActiveBattery(active.id)
             const activeIndex = batteryList.indexOf(active.id)
             const overIndex = batteryList.indexOf(over.id)
+
             newBatteryList.splice(activeIndex, 1)
-            newBatteryList.splice(overIndex, 0, active.id)
+
+            const lastActive = overIndex === -1
+
+            newBatteryList.splice((lastActive) ? activeIndex : overIndex, 0, (lastActive) ? over.id : active.id)
+        } else {
+            const activeIndex = batteryList.indexOf(active.id)
+            newBatteryList.splice(activeIndex, 1)
         }
         return newBatteryList
     }
@@ -109,8 +118,8 @@ export default function BatteryColumn() {
     function sendDatabaseChange(event) {
         const { active, over } = event
         const updates = {
-            [active.id]: batteryList.indexOf(over.id),
-            [over.id]: batteryList.indexOf(active.id),
+            [active.id]: {index: batteryList.indexOf(over.id), count: data[active.id].count},
+            [over.id]: {index: batteryList.indexOf(active.id), count: data[over.id].count + 1},
             'Active Battery': active.id,
         }
         updateDatabase(updates)
@@ -135,7 +144,7 @@ export default function BatteryColumn() {
             let updates = {}
             newBatteryList.forEach((battery, index) => {
                 if (battery === -1) return
-                updates[battery] = index
+                updates[battery] = {index: index, count: data[battery].count}
             })
             updates['Active Battery'] = activeBattery
             updateDatabase(updates)
