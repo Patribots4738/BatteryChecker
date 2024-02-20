@@ -27,7 +27,7 @@ export function Droppable(props) {
         <div ref={setNodeRef} style={style}>
             <Item>
                 <Battery80Icon />
-                {props.value}
+                {props.id} {" | Usages: "} {props.count}
             </Item>
         </div>
     )

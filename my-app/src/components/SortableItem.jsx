@@ -1,10 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable'
 import Paper from '@mui/material/Paper'
 import { CSS } from '@dnd-kit/utilities'
-import { styled } from '@mui/material'
+import { Card, CardContent, CardHeader, styled } from '@mui/material'
 import Battery80Icon from '@mui/icons-material/Battery80'
 
-export default function SortableItem({ id, index }) {
+export default function SortableItem({ id, index, count }) {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id: id })
 
@@ -14,9 +14,8 @@ export default function SortableItem({ id, index }) {
     }
 
     const Item = styled(Paper)(({ theme }) => ({
-        ...style,
-        margin: theme.spacing(2),
-        padding: theme.spacing(2),
+        margin: theme.spacing(1.2),
+        padding: theme.spacing(1),
         cursor: 'grab',
         color: 'white',
         fontSize: '1.2rem',
@@ -26,10 +25,20 @@ export default function SortableItem({ id, index }) {
 
     return (
         <div ref={setNodeRef} {...attributes} {...listeners}>
-            <Item elevation={index}>
-                <Battery80Icon />
-                {id}
-            </Item>
+            <Card
+                variant="outlined"
+                style={{
+                    ...style,
+                    backgroundColor: '#989898',
+                    padding: 0.5,
+                    margin: 15,
+                }}
+            >
+                <Item elevation={index}>
+                    <Battery80Icon />
+                    {id} {" | Usages: "} {count}
+                </Item>
+            </Card>
         </div>
     )
 }

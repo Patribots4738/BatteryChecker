@@ -59,7 +59,7 @@ export default function BatteryColumn() {
                 sensors={[mouseSensor, touchSensor]}
                 autoScroll={{ threshold: { x: 0, y: 0.2 } }}
             >
-                <Droppable id={activeBattery} value={activeBattery} />
+                <Droppable id={activeBattery} value={activeBattery} count={data[activeBattery]?.count} />
                 <SortableContext
                     items={batteryList}
                     strategy={verticalListSortingStrategy}
@@ -70,6 +70,7 @@ export default function BatteryColumn() {
                             key={battery}
                             id={battery}
                             index={index}
+                            count={data[battery].count}
                         />
                     ))}
                 </SortableContext>
