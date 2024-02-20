@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import Paper from '@mui/material/Paper'
 import { CSS } from '@dnd-kit/utilities'
-import { Card, CardContent, CardHeader, styled } from '@mui/material'
+import { Card, styled } from '@mui/material'
 import Battery80Icon from '@mui/icons-material/Battery80'
 
 export default function SortableItem({ id, index, count }) {
