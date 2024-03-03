@@ -52,7 +52,6 @@ export default function BatteryColumn() {
 
     return (
         <div>
-            <button onClick={resetDatabase}>Reset Database</button>
             <DndContext
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
