@@ -8,11 +8,11 @@ import {
     useSensor,
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { useEffect, useState } from 'react'
 
+import { Droppable } from './Droppable'
+import { useEffect, useState } from 'react'
 import { ref, onValue, set, update } from 'firebase/database'
 import { db } from '../firebase/firebaseConfig'
-import { Droppable } from './Droppable'
 
 export default function BatteryColumn() {
     const [batteryList, setBatteryList] = useState([])
@@ -20,31 +20,34 @@ export default function BatteryColumn() {
     const [data, setData] = useState({})
 
     useEffect(() => {
-        setTimeout(() => {
-            const query = ref(db, 'batteries')
-            return onValue(query, (snapshot) => {
-                const data = snapshot.val()
-    
-                if (snapshot.exists()) {
-                    let batteryList = []
-                    let activeBattery = ''
-                    setData(data)
-                    console.log('data:', data)
-                    Object.keys(data)
-                        .filter((key) => key !== 'donot' && key !== 'Active Battery')
-                        .sort((a, b) => data[a].index - data[b].index)
-                        .forEach((key) => {
-                            console.log('key:', key)
-                            if (data[key].index === -1) return
-                            console.log(key)
-                            batteryList.push(key)
-                        })
-                    activeBattery = data['Active Battery']
-                    setActiveBattery(activeBattery)
-                    setBatteryList(batteryList)
-                }
-            })
-        }, 1000)
+        // Check if there is data in local storage
+        const localData = localStorage.getItem('batteryData')
+        if (localData) {
+            const parsedData = JSON.parse(localData)
+            setData(parsedData)
+            setBatteryList(Object.keys(parsedData).filter(key => key !== 'Active Battery' && key !== 'donot'))
+            setActiveBattery(parsedData['Active Battery'])
+        }
+
+        // Fetch data from the database
+        const query = ref(db, 'batteries')
+        onValue(query, (snapshot) => {
+            const data = snapshot.val()
+            if (snapshot.exists()) {
+                setData(data)
+                localStorage.setItem('batteryData', JSON.stringify(data)) // Update local storage
+                let batteryList = []
+                Object.keys(data)
+                    .filter((key) => key !== 'donot' && key !== 'Active Battery')
+                    .sort((a, b) => data[a].index - data[b].index)
+                    .forEach((key) => {
+                        if (data[key].index === -1) return
+                        batteryList.push(key)
+                    })
+                setActiveBattery(data['Active Battery'])
+                setBatteryList(batteryList)
+            }
+        })
     }, [])
 
     const mouseSensor = useSensor(MouseSensor)
@@ -126,8 +129,11 @@ export default function BatteryColumn() {
     }
 
     function updateDatabase(updates) {
-        console.log('updates:', updates)
         update(ref(db, 'batteries'), updates)
+        // Update local storage
+        const updatedData = { ...data, ...updates }
+        setData(updatedData)
+        localStorage.setItem('batteryData', JSON.stringify(updatedData))
     }
 
     function handleDragEnd(event) {
@@ -147,6 +153,8 @@ export default function BatteryColumn() {
                 updates[battery] = {index: index, count: data[battery].count}
             })
             updates['Active Battery'] = activeBattery
+            console.log('activeBattery:', activeBattery)
+            console.log('over.id:', over.id)
             updateDatabase(updates)
         }else if (active.id !== over.id) {
             // check if we are dragging onto the active battery, if so, we don't want to change the order
