@@ -10,6 +10,7 @@ export default function BatteryContainer() {
                 spacing={0.5}
                 justifyContent="center"
             >
+                Hi this should do something maybe
                 <BatteryColumn />
             </Stack>
         </div>
