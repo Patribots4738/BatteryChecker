@@ -1,6 +1,6 @@
 {
-    "name": "my-app",
-    "version": "0.1.0",
+    "name": "battery-checker",
+    "version": "1.0.0a0",
     "private": true,
     "dependencies": {
         "@dnd-kit/core": "^6.1.0",
